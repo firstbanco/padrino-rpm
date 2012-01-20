@@ -17,15 +17,10 @@ module PadrinoRpm
     module Padrino
       include NewRelic::Agent::Instrumentation::ControllerInstrumentation
       
-      def route_eval(*args, &block)
-        if @route
-          name = @route.as_options[:name]
-          short_name = name.to_s.split(/_/).last
-          controller = @route.controller
-        end
+      def route_eval(&block)
         
-        perform_action_with_newrelic_trace(:category => :controller, :name => short_name, :params => request.params, :class_name => controller)  do
-          route_eval_without_newrelic(*args, &block) # RPM loads the sinatra plugin too eagerly
+        perform_action_with_newrelic_trace(:category => :controller, :path => request.path, :params => request.params)  do
+          route_eval_without_newrelic(&block) # RPM loads the sinatra plugin too eagerly
         end
       end
 
